@@ -16,18 +16,13 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         # 窗体图标
         self.setWindowIcon(QIcon("ip_cheat.ico"))
-        self.config = None
-        self.scan = None
-        self.attack = None
-        self.save = None
-        self.cheat = None
-        self.init()
-
-    def init(self):
         self.scan = Scan()
         self.config = Config()
         self.save = Save()
         self.attack = Attack()
+        self.cheat = None
+        self.scan.host_scan_status.connect(self.add_host_result)
+        self.scan.port_scan_status.connect(self.add_port_result)
         for val in self.config.ipv4_adp.keys():
             self.send_card.addItem(val)
 
@@ -82,6 +77,28 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.config.change_adp(self.send_card.currentText())
         self.scan.init_adp(self.config)
 
+    def add_host_result(self):
+        self.save.add(self.scan)
+        self.live_host.clear()
+        self.cheat_host_one_C.clear()
+        self.cheat_host_two_C.clear()
+        self.gw.clear()
+        self.trust_ip_C.clear()
+        self.server_ip_C.clear()
+        for val in self.save.scan_ip:
+            self.live_host.addItem(val)
+            self.cheat_host_one_C.addItem(val)
+            self.cheat_host_two_C.addItem(val)
+            self.trust_ip_C.addItem(val)
+            self.server_ip_C.addItem(val)
+            self.gw.addItem(val)
+
+    def add_port_result(self):
+        self.save.add(self.scan)
+        self.ip_and_open_port.clear()
+        for val in self.save.ip_port:
+            self.ip_and_open_port.addItem(val)
+
     # 开始扫描
     def start_scan(self):
         scan_ip = self.need_scan_ip_T.toPlainText()
@@ -93,40 +110,12 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                 gw_mac = self.save.scan_mac[self.save.scan_ip.index(self.gw.currentText())]
                 if stc == "ICMP扫描":
                     self.scan.extra_icmp_scan(scan_ip, gw_mac)
-                self.save.add(self.scan)
-                self.live_host.clear()
-                self.cheat_host_one_C.clear()
-                self.cheat_host_two_C.clear()
-                self.gw.clear()
-                self.trust_ip_C.clear()
-                self.server_ip_C.clear()
-                for val in self.save.scan_ip:
-                    self.live_host.addItem(val)
-                    self.cheat_host_one_C.addItem(val)
-                    self.cheat_host_two_C.addItem(val)
-                    self.trust_ip_C.addItem(val)
-                    self.server_ip_C.addItem(val)
-                    self.gw.addItem(val)
             else:
                 stc = self.scan_type_C.currentText()
                 if stc == "ARP扫描":
                     self.scan.arp_scan(scan_ip)
                 if stc == "ICMP扫描":
                     self.scan.icmp_scan(scan_ip)
-                self.save.add(self.scan)
-                self.gw.clear()
-                self.live_host.clear()
-                self.cheat_host_one_C.clear()
-                self.cheat_host_two_C.clear()
-                self.trust_ip_C.clear()
-                self.server_ip_C.clear()
-                for val in self.save.scan_ip:
-                    self.live_host.addItem(val)
-                    self.cheat_host_one_C.addItem(val)
-                    self.cheat_host_two_C.addItem(val)
-                    self.trust_ip_C.addItem(val)
-                    self.server_ip_C.addItem(val)
-                    self.gw.addItem(val)
             """
             self.trust_ip_C.addItem("192.168.1.200")
             self.cheat_host_one_C.addItem("192.168.1.200")
@@ -137,10 +126,6 @@ class MyWindow(QMainWindow, Ui_MainWindow):
                 self.scan.tcp_port(scan_ip, port)
             if ptr == "UDP端口":
                 self.scan.udp_port(scan_ip, port)
-            self.save.add(self.scan)
-            self.ip_and_open_port.clear()
-            for val in self.save.ip_port:
-                self.ip_and_open_port.addItem(val)
 
 
 if __name__ == '__main__':

@@ -2,10 +2,16 @@ from kamene.layers.inet import *
 from kamene.all import *
 from scapy.all import RandShort
 from config import Config
+from PyQt5.QtCore import *
 import threading
 
-class Scan:
-    def __init__(self):
+
+class Scan(QObject):
+    host_scan_status = pyqtSignal()
+    port_scan_status = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super(QObject, self).__init__(parent)
         self._iface = None
         self._mac = None
         self._ip = None
@@ -49,6 +55,7 @@ class Scan:
         for value in un_as:
             if value not in self.scan_ip_no_use:
                 self.scan_ip_no_use.append(value[ARP].pdst)
+        self.host_scan_status.emit()
         """
         answer, un_as = srp(
             Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip_input),
@@ -84,6 +91,7 @@ class Scan:
         for value in un_an:
             if value not in self.scan_ip_no_use:
                 self.scan_ip_no_use.append(value[IP].dst)
+        self.host_scan_status.emit()
 
     def _extra_icmp_scan(self, ip_input: str, gw_mac: str):
         self.init_ip_mac()
@@ -101,6 +109,7 @@ class Scan:
         for value in un_an:
             if value not in self.scan_ip_no_use:
                 self.scan_ip_no_use.append(value[IP].dst)
+        self.host_scan_status.emit()
 
     # 输入字符串处理
     def port_handle(self, port_list: str):
@@ -130,6 +139,7 @@ class Scan:
         for s, r in ans:
             if r[TCP].flags == 0x012:
                 self.ip_port.append(str(r[IP].src) + ':' + str(r[TCP].sport) + ':tcp')
+        self.port_scan_status.emit()
 
     # udp端口扫描
     def _udp_port(self, ip_input: str, port: str):
@@ -153,6 +163,7 @@ class Scan:
             elif r[ICMP].type == 3 and r[ICMP].code in [1, 2, 3, 9, 10, 13]:
                 port_no_list.append(r[ICMP].dport)
             """
+        self.port_scan_status.emit()
 
     def icmp_scan(self, ip_input: str):
         threading.Thread(target=self._icmp_scan, args=(ip_input,)).start()
@@ -163,8 +174,9 @@ class Scan:
     def arp_scan(self, ip_input: str):
         threading.Thread(target=self._arp_scan, args=(ip_input,)).start()
 
-    def tcp_port(self, ip_input:str, port:str):
+    def tcp_port(self, ip_input: str, port: str):
         threading.Thread(target=self._tcp_port, args=(ip_input, port)).start()
 
     def udp_port(self, ip_input: str, port: str):
         threading.Thread(target=self._udp_port, args=(ip_input, port)).start()
+
