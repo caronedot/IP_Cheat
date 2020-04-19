@@ -9,7 +9,7 @@
 
 主要使用方法：
 
-   先选择发包网卡的IP
+   先选择发包网卡的IP，即所有构造的数据将从该网卡发送出去，可以使用wireshark查看。
 
    ![chose_send](https://github.com/lixiaobei/IP_Cheat/tree/master/example_photo/chose_send_card.png)
 
