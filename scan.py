@@ -155,13 +155,13 @@ class Scan:
             """
 
     def icmp_scan(self, ip_input: str):
-        threading.Thread(target=self._icmp_scan, args=ip_input).start()
+        threading.Thread(target=self._icmp_scan, args=(ip_input)).start()
 
     def extra_icmp_scan(self, ip_input: str, gw_mac: str):
-        threading.Thread(target=self._extra_icmp_scan, args=ip_input).start()
+        threading.Thread(target=self._extra_icmp_scan, args=(ip_input)).start()
 
     def arp_scan(self, ip_input: str):
-        threading.Thread(target=self._arp_scan, args=ip_input).start()
+        threading.Thread(target=self._arp_scan, args=(ip_input)).start()
 
     def tcp_port(self, ip_input:str, port:str):
         threading.Thread(target=self._tcp_port, args=(ip_input, port)).start()
