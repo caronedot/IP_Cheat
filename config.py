@@ -15,21 +15,27 @@ class Config:
     # 获取网卡列表
     def get_net_if_addr(self):
         dic = psutil.net_if_addrs()
+        mac = []
+        ipv4 = []
         # print(dic)
         for adapter in dic:
             s_list = dic[adapter]
-            mac = None
             # print(adapter)
             # 虚拟的网卡名称
             # adp_list.append(adapter)
             for s_nic in s_list:
                 # print(s_nic)
                 if s_nic.family.name in {'AF_LINK', 'AF_PACKET'}:
-                    mac = s_nic.address
+                    if s_nic.address not in mac:
+                        mac.append(s_nic.address)
                 elif s_nic.family.name == 'AF_INET':
                     # 获取kamene真正的网卡名称
-                    self.ipv4_mac[s_nic.address] = mac
+                    if s_nic.address not in ipv4:
+                        ipv4.append(s_nic.address)
                     self.ipv4_adp[s_nic.address] = conf.route.route(s_nic.address)[0]
+        for i in range(0, len(mac)):
+            self.ipv4_mac[ipv4[i]] = mac[i]
+        # print(self.ipv4_mac)
 
     def change_adp(self, network: str):
         """

@@ -27,6 +27,13 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         self.scan.port_scan_status.connect(self.add_port_result)
         for val in self.config.ipv4_adp.keys():
             self.send_card.addItem(val)
+        _translate = QtCore.QCoreApplication.translate
+        self.need_scan_ip_T.setPlainText(_translate("MainWindow", "192.168.1.142"))
+        self.save_file_path_T.setPlainText(_translate("MainWindow", "D:/PycharmProjects/IP欺骗"))
+        self.cheat_port_T.setPlainText(_translate("MainWidow", "80"))
+        self.send_card.setCurrentText(_translate("MainWidow", "192.168.1.1"))
+        # self.cheat_host_one_C.setCurrentText(_translate("MainWidow", "192.168.1.200"))
+        # self.trust_ip_C.setCurrentText(_translate("MainWidow", "192.168.1.200"))
 
     # 选择文件路径
     def chose_filepath(self):
@@ -106,14 +113,13 @@ class MyWindow(QMainWindow, Ui_MainWindow):
         scan_ip = self.need_scan_ip_T.toPlainText()
         port = self.need_scan_port_T.toPlainText()
         self.init_scan()
+        stc = self.scan_type_C.currentText()
         if self.host_choice.isChecked():
             if self.gwcheck.isChecked():
-                stc = self.scan_type_C.currentText()
                 gw_mac = self.save.scan_mac[self.save.scan_ip.index(self.gw.currentText())]
                 if stc == "ICMP扫描":
                     self.scan.extra_icmp_scan(scan_ip, gw_mac)
             else:
-                stc = self.scan_type_C.currentText()
                 if stc == "ARP扫描":
                     self.scan.arp_scan(scan_ip)
                 if stc == "ICMP扫描":
@@ -124,10 +130,17 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             """
         if self.port_choice.isChecked():
             ptr = self.port_type_C.currentText()
-            if ptr == "TCP端口":
-                self.scan.tcp_port(scan_ip, port)
-            if ptr == "UDP端口":
-                self.scan.udp_port(scan_ip, port)
+            if self.gwcheck.isChecked():
+                gw_mac = self.save.scan_mac[self.save.scan_ip.index(self.gw.currentText())]
+                if ptr == "TCP端口":
+                    self.scan.extra_tcp_port(scan_ip, port, gw_mac)
+                if ptr == "UDP端口":
+                    self.scan.extra_udp_port(scan_ip, port, gw_mac)
+            else:
+                if ptr == "TCP端口":
+                    self.scan.tcp_port(scan_ip, port)
+                if ptr == "UDP端口":
+                    self.scan.udp_port(scan_ip, port)
 
 
 if __name__ == '__main__':

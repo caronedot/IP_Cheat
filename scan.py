@@ -134,7 +134,24 @@ class Scan(QObject):
             port = self.port_handle(port)
         ans, un_an = srp(Ether(src=self._mac, dst="ff:ff:ff:ff:ff:ff") /
                          IP(dst=ip_input) /
-                         TCP(sport=RandShort(), dport=port, flags="S"),
+                         TCP(sport=int(RandShort()), dport=port, flags="S"),
+                         inter=0.1, timeout=2, iface=self._iface, verbose=0)
+        for s, r in ans:
+            if r[TCP].flags == 0x012:
+                self.ip_port.append(str(r[IP].src) + ':' + str(r[TCP].sport) + ':tcp')
+        self.port_scan_status.emit()
+
+    # tcp端口扫描
+    def _extra_tcp_port(self, ip_input: str, port: str, gw_mac: str):
+        self.init_port()
+        if '-' in port:
+            port = self.port_handle(port)
+            port = tuple(port)
+        else:
+            port = self.port_handle(port)
+        ans, un_an = srp(Ether(src=self._mac, dst=gw_mac) /
+                         IP(dst=ip_input) /
+                         TCP(sport=int(RandShort()), dport=port, flags="S"),
                          inter=0.1, timeout=2, iface=self._iface, verbose=0)
         for s, r in ans:
             if r[TCP].flags == 0x012:
@@ -153,9 +170,32 @@ class Scan(QObject):
             port = self.port_handle(port)
             self.ip_port.append(ip_input + ':' + str(port[0]) + ':udp')
         ans, un_an = sr(IP(dst=ip_input) /
-                        UDP(sport=RandShort(), dport=port),
+                        UDP(sport=int(RandShort()), dport=port),
                         inter=0.1, timeout=2, iface=self._iface, verbose=0)
 
+        for s, r in ans:
+            if r.haslayer(ICMP):
+                self.ip_port.pop(self.ip_port.index(ip_input + ':' + str(r["UDP in ICMP"].dport)+':udp'))
+            """
+            elif r[ICMP].type == 3 and r[ICMP].code in [1, 2, 3, 9, 10, 13]:
+                port_no_list.append(r[ICMP].dport)
+            """
+        self.port_scan_status.emit()
+
+    def _extra_udp_port(self, ip_input: str, port: str, gw_mac: str):
+        self.init_port()
+        if '-' in port:
+            port = self.port_handle(port)
+            port = tuple(port)
+            for i in range(port[0], port[1]+1):
+                self.ip_port.append(ip_input + ':' + str(i) + ':udp')
+        else:
+            port = self.port_handle(port)
+            self.ip_port.append(ip_input + ':' + str(port[0]) + ':udp')
+        ans, un_an = srp(Ether(src=self._mac, dst=gw_mac) /
+                         IP(dst=ip_input) /
+                         UDP(sport=int(RandShort()), dport=port),
+                         inter=0.1, timeout=2, iface=self._iface, verbose=0)
         for s, r in ans:
             if r.haslayer(ICMP):
                 self.ip_port.pop(self.ip_port.index(ip_input + ':' + str(r["UDP in ICMP"].dport)+':udp'))
@@ -177,6 +217,12 @@ class Scan(QObject):
     def tcp_port(self, ip_input: str, port: str):
         threading.Thread(target=self._tcp_port, args=(ip_input, port)).start()
 
+    def extra_tcp_port(self, ip_input: str, port: str, gw_mac: str):
+        threading.Thread(target=self._extra_tcp_port, args=(ip_input, port, gw_mac)).start()
+
     def udp_port(self, ip_input: str, port: str):
         threading.Thread(target=self._udp_port, args=(ip_input, port)).start()
+
+    def extra_udp_port(self, ip_input: str, port: str, gw_mac: str):
+        threading.Thread(target=self._extra_udp_port, args=(ip_input, port, gw_mac)).start()
 

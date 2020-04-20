@@ -17,7 +17,7 @@
 
    ![input_scan_ip](https://github.com/lixiaobei/IP_Cheat/tree/master/example_photo/input_scan_ip.png)
 
-   选择网关：即将数据包交给网关，由网关转发数据包（仅有ICMP实现——主要实现扫描不是本网段的主机）
+   选择网关：即将数据包交给网关，由网关转发数据包（仅有扫描实现——ARP没实现）
 
    ![chose_gw](https://github.com/lixiaobei/IP_Cheat/tree/master/example_photo/chose_gw.png)
 
