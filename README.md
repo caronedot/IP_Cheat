@@ -13,7 +13,7 @@
 
    ![chose_send](https://github.com/lixiaobei/IP_Cheat/tree/master/example_photo/chose_send_card.png)
 
-   输入扫描的IP：192.168.1.1，192.168.1.1/24
+   输入扫描的IP，输入格式可为192.168.1.1，192.168.1.1/24
 
    ![input_scan_ip](https://github.com/lixiaobei/IP_Cheat/tree/master/example_photo/input_scan_ip.png)
 
@@ -29,6 +29,6 @@
 
    ![chose_flood](https://github.com/lixiaobei/IP_Cheat/tree/master/example_photo/flood_attack.png)
 
-   进行IP欺骗，选择信任的IP，选择服务器的IP，输入服务器开启的端口，输入要访问的路径，即以信任IP的IP与服务器IP建立TCP连接，并发送Get请求
+   进行IP欺骗，选择信任的IP，选择服务器的IP，输入服务器开启的端口，输入要访问的路径，选择保存的文件夹，可以发现访问的内容保存在该文件夹内
 
    ![ip_cheat](https://github.com/lixiaobei/IP_Cheat/tree/master/example_photo/start_ip_cheat.png)
