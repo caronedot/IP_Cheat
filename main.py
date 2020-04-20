@@ -6,8 +6,10 @@ from save import Save
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5 import QtCore
 from IP_Cheat import Ui_MainWindow
 import ctypes
+import re
 
 
 class MyWindow(QMainWindow, Ui_MainWindow):
@@ -33,16 +35,14 @@ class MyWindow(QMainWindow, Ui_MainWindow):
 
     # 开始ip欺骗
     def start_cheat(self):
-        path = self.save_file_path_T.toPlainText()
-        f = open(path + "/log.txt", 'a+', encoding='UTF-8')
         adp_ip = self.send_card.currentText()
         self.config.change_adp(adp_ip)
         t_ip = self.trust_ip_C.currentText()
         s_ip = self.server_ip_C.currentText()
         t_port = int(self.cheat_port_T.toPlainText())
-        path = self.http_view_T.toPlainText()
-        self.cheat = Cheat(self.config, self.save, t_ip, s_ip, t_port)
-        self.cheat.ip_defeat(path, f)
+        self.cheat = Cheat(self.config, self.save, t_ip, s_ip, t_port,
+                           self.save_file_path_T.toPlainText(), self.http_view_T.toPlainText())
+        self.cheat.ip_defeat()
 
     # 开始洪泛攻击
     def start_attack(self):
@@ -92,6 +92,8 @@ class MyWindow(QMainWindow, Ui_MainWindow):
             self.trust_ip_C.addItem(val)
             self.server_ip_C.addItem(val)
             self.gw.addItem(val)
+        self.trust_ip_C.addItem("192.168.1.200")
+        self.cheat_host_one_C.addItem("192.168.1.200")
 
     def add_port_result(self):
         self.save.add(self.scan)
