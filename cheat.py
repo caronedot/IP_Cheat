@@ -18,7 +18,9 @@ class Cheat:
         self._port_s = int(RandShort())
         self.port_r = port_r
         self._threads = []
-        self._filter_string = "tcp and src port " + str(self.port_r) + " and src host " + self.ip_r
+        self._filter_string = "tcp and src port " \
+                              "" + str(self.port_r) + " and src host " + self.ip_r + " and dst host " \
+                              "" + self.ip_s + " and dst port " + str(self._port_s)
         self._last_ack = 0
         self._last_seq = 0
         self._mac_r = None
@@ -48,6 +50,7 @@ class Cheat:
         return mac_a, mac_b
 
     def whole_tcp(self):
+        self.so.start()
         ans, un_an = srp(Ether(src=self._mac_s, dst=self._mac_r) /
                          IP(src=self.ip_s, dst=self.ip_r) /
                          TCP(sport=self._port_s, dport=self.port_r, flags="S", seq=self._seq, window=65535),
@@ -63,7 +66,7 @@ class Cheat:
 
     def http_request(self, path):
         # load_layer("http")
-        self.so.start()
+
         sendp(Ether(src=self._mac_s, dst=self._mac_r) /
               IP(src=self.ip_s, dst=self.ip_r) /
               TCP(sport=self._port_s, dport=self.port_r, flags="A", ack=self._ack, seq=self._seq, window=65535)
