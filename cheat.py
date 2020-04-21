@@ -50,7 +50,6 @@ class Cheat:
         return mac_a, mac_b
 
     def whole_tcp(self):
-        self.so.start()
         ans, un_an = srp(Ether(src=self._mac_s, dst=self._mac_r) /
                          IP(src=self.ip_s, dst=self.ip_r) /
                          TCP(sport=self._port_s, dport=self.port_r, flags="S", seq=self._seq, window=65535),
@@ -119,7 +118,7 @@ class Cheat:
                          IP(src=self.ip_s, dst=self.ip_r) /
                          TCP(sport=self._port_s, dport=self.port_r, flags="AF", ack=self._last_ack, seq=self._last_seq,
                              window=65535),
-                         inter=0.1, iface=self._nw_if, verbose=0, retry=3)
+                         inter=0.1, iface=self._nw_if, verbose=0, retry=5)
         for s, value in ans:
             sendp(Ether(src=self._mac_s, dst=self._mac_r) /
                   IP(src=self.ip_s, dst=self.ip_r) /
@@ -142,11 +141,16 @@ class Cheat:
         else:
             f = open(self.save_path + path, 'wb+')
         for val in self.res:
-            # val.show()
+            """
+            if val.haslayer(TCP):
+                print(val[TCP].seq)
+            if val.haslayer(Raw):
+                print(val[Raw].load)
+            """
             if val.haslayer(Raw):
                 if i <= val[TCP].seq:
                     f.write(val[Raw].load)
-                    i = val[TCP].seq
+                    i = val[TCP].seq+len(val[Raw].load)
         f.close()
         f = None
         if path == '/':
@@ -159,17 +163,17 @@ class Cheat:
         if f:
             s = f.read()
             res = re.findall(r'src=".*?"', s)
+            f.close()
             ans = []
             for i in res:
                 ans.append(*re.findall(r'".*"', i))
             for i in ans:
                 visit_path = "/" + i.strip('\"')
-                threading.Thread(target=self._ip_defeat, args=(visit_path,)).start()
-            f.close()
+                self._ip_defeat(visit_path)
 
     def log(self):
         self.so = AsyncSniffer(iface=self._nw_if, filter=self._filter_string)
-        # f.write(str(an[0][Raw].load))
+        self.so.start()
 
     def ip_defeat(self):
         # path = urllib.parse.quote(path)
